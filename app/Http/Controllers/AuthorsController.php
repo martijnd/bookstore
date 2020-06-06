@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Author;
+use App\Http\Requests\CreateAuthorRequest;
+use App\Http\Requests\UpdateAuthorRequest;
+use App\Http\Resources\AuthorsResource;
 use Illuminate\Http\Request;
 
 class AuthorsController extends Controller
@@ -14,17 +17,8 @@ class AuthorsController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $authors = Author::all();
+        return AuthorsResource::collection($authors);
     }
 
     /**
@@ -33,9 +27,16 @@ class AuthorsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateAuthorRequest $request)
     {
-        //
+        $author = Author::create([
+            'name' => $request->input('data.attributes.name')
+        ]);
+
+        return (new AuthorsResource($author))
+            ->response()
+            ->header('Location', route('authors.show', ['author' =>
+            $author]));
     }
 
     /**
@@ -46,18 +47,7 @@ class AuthorsController extends Controller
      */
     public function show(Author $author)
     {
-        return $author;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Author  $author
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Author $author)
-    {
-        //
+        return new AuthorsResource($author);
     }
 
     /**
@@ -67,9 +57,11 @@ class AuthorsController extends Controller
      * @param  \App\Author  $author
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Author $author)
+    public function update(UpdateAuthorRequest $request, Author $author)
     {
-        //
+        $author->update($request->input('data.attributes'));
+
+        return new AuthorsResource($author);
     }
 
     /**
@@ -80,6 +72,8 @@ class AuthorsController extends Controller
      */
     public function destroy(Author $author)
     {
-        //
+        $author->delete();
+
+        return response(null, 204);
     }
 }
