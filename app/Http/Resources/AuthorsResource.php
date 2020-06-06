@@ -18,11 +18,10 @@ class AuthorsResource extends JsonResource
             'id' => (string) $this->id,
             'type' => 'authors',
             'attributes' => [
-                'name' => [
-                    'name' => $this->name,
-                    'created_at' => $this->created_at,
-                    'updated_at' => $this->updated_at,
-                ]
+                'name' => $this->name,
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
+
             ]
 
         ];
