@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -53,6 +54,18 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         return parent::render($request, $exception);
+    }
+
+    protected function prepareJsonResponse($request, Throwable $e)
+    {
+        return response()->json([
+            'errors' => [
+                [
+                    'title' => Str::title(Str::snake(class_basename($e), ' ')),
+                    'details' => $e->getMessage(),
+                ]
+            ]
+        ], $this->isHttpException($e) ? $e->getStatusCode() : 500);
     }
 
     protected function invalidJson($request, ValidationException $exception)
