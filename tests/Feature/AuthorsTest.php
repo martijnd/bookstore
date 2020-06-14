@@ -3,12 +3,18 @@
 use App\Author;
 use App\User;
 
-it('returns all authors as a collection of resource objects', function () {
+beforeEach(function () {
     $user = factory(User::class)->create();
     actingAs($user);
+});
+
+it('returns all authors as a collection of resource objects', function () {
     $authors = factory(Author::class, 3)->create();
 
-    $this->get('/api/v1/authors')->assertStatus(200)->assertJson([
+    $this->getJson('/api/v1/authors', [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
+    ])->assertStatus(200)->assertJson([
         "data" => [
             [
                 "id" => '1',
@@ -43,8 +49,6 @@ it('returns all authors as a collection of resource objects', function () {
 
 
 it('can create an author from a resource object', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
 
     $this->postJson('/api/v1/authors', [
         'data' => [
@@ -53,6 +57,9 @@ it('can create an author from a resource object', function () {
                 'name' => 'John Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])->assertStatus(201)->assertJson([
         "data" => [
             "id" => '1',
@@ -77,7 +84,10 @@ it('returns an author as a resource object', function () {
 
     actingAs($user);
 
-    $this->getJson('/api/v1/authors/1')
+    $this->getJson('/api/v1/authors/1', [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
+    ])
         ->assertStatus(200)
         ->assertJson([
             "data" => [
@@ -93,10 +103,7 @@ it('returns an author as a resource object', function () {
         ]);
 });
 
-
 it('can update an author from a resource object', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
 
     $this->patchJson('/api/v1/authors/1', [
@@ -107,6 +114,9 @@ it('can update an author from a resource object', function () {
                 'name' => 'Jane Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])->assertStatus(200)->assertJson(['data' => [
         'id' => '1',
         'type' => 'authors',
@@ -123,8 +133,6 @@ it('can update an author from a resource object', function () {
 });
 
 it('can delete an author through a delete request', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->delete('/api/v1/authors/1', [], [
         'Accept' => 'application/vnd.api+json',
@@ -137,9 +145,6 @@ it('can delete an author through a delete request', function () {
 });
 
 it('validates that the type member is given when creating an author', function () {
-    $user = factory(User::class)->create();
-
-    actingAs($user);
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => '',
@@ -147,6 +152,9 @@ it('validates that the type member is given when creating an author', function (
                 'name' => 'John Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])->assertStatus(422)
         ->assertJson([
             'errors' => [
@@ -168,9 +176,7 @@ it('validates that the type member is given when creating an author', function (
     ]);
 });
 
-it('validates_that_the_type_member_has_the_value_of_authors_when_creating_an_author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
+it('validates that the type member has the value of authors when creating an author', function () {
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => 'author',
@@ -178,6 +184,9 @@ it('validates_that_the_type_member_has_the_value_of_authors_when_creating_an_aut
                 'name' => 'John Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -198,12 +207,13 @@ it('validates_that_the_type_member_has_the_value_of_authors_when_creating_an_aut
 });
 
 it('validates that the attributes member has been given when creating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => 'authors',
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -224,13 +234,14 @@ it('validates that the attributes member has been given when creating an author'
 });
 
 it('validates that the attributes member is an object given when creating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => 'authors',
             'attributes' => 'not an object',
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])->assertStatus(422)
         ->assertJson([
             'errors' => [
@@ -249,8 +260,6 @@ it('validates that the attributes member is an object given when creating an aut
     ]);
 });
 it('validates that a name attribute is given when creating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => 'authors',
@@ -258,6 +267,9 @@ it('validates that a name attribute is given when creating an author', function 
                 'name' => '',
             ],
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -279,8 +291,6 @@ it('validates that a name attribute is given when creating an author', function 
 });
 
 it('validates that a name attribute is a string when creating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $this->postJson('/api/v1/authors', [
         'data' => [
             'type' => 'authors',
@@ -288,6 +298,9 @@ it('validates that a name attribute is a string when creating an author', functi
                 'name' => 47,
             ],
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -309,8 +322,6 @@ it('validates that a name attribute is a string when creating an author', functi
 });
 
 it('validates that an id member is given when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -319,6 +330,9 @@ it('validates that an id member is given when updating an author', function () {
                 'name' => 'Jane Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -339,8 +353,6 @@ it('validates that an id member is given when updating an author', function () {
 });
 
 it('validates that an id member is a string when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -350,6 +362,9 @@ it('validates that an id member is a string when updating an author', function (
                 'name' => 'Jane Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -370,8 +385,6 @@ it('validates that an id member is a string when updating an author', function (
 });
 
 it('validates that the type member is given when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -381,6 +394,9 @@ it('validates that the type member is given when updating an author', function (
                 'name' => 'Jane Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -401,8 +417,6 @@ it('validates that the type member is given when updating an author', function (
 });
 
 it('validates that the type member has the value of authors when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -412,6 +426,9 @@ it('validates that the type member has the value of authors when updating an aut
                 'name' => 'Jane Doe',
             ]
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -432,14 +449,15 @@ it('validates that the type member has the value of authors when updating an aut
 });
 
 it('validates that the attributes member has been given when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
             'id' => '1',
             'type' => 'authors',
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -460,8 +478,6 @@ it('validates that the attributes member has been given when updating an author'
 });
 
 it('validates that the attributes member is an object given when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -469,6 +485,9 @@ it('validates that the attributes member is an object given when updating an aut
             'type' => 'authors',
             'attributes' => 'not an object',
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
@@ -489,8 +508,6 @@ it('validates that the attributes member is an object given when updating an aut
 });
 
 it('validates that a name attribute is a string when updating an author', function () {
-    $user = factory(User::class)->create();
-    actingAs($user);
     $author = factory(Author::class)->create();
     $this->patchJson('/api/v1/authors/1', [
         'data' => [
@@ -500,6 +517,9 @@ it('validates that a name attribute is a string when updating an author', functi
                 'name' => 47,
             ],
         ]
+    ], [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
     ])
         ->assertStatus(422)
         ->assertJson([
