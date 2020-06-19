@@ -538,3 +538,153 @@ it('validates that a name attribute is a string when updating an author', functi
         'name' => $author->name,
     ]);
 });
+
+it('it can sort authors by name through a sort query parameter', function () {
+    $authors = collect(['Bertram', 'Claus', 'Anna',])->map(fn ($name) => factory(Author::class)->create(['name' => $name]));
+
+    $this->getJson('/api/v1/authors?sort=name', [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json'
+    ])
+        ->assertStatus(200)
+        ->assertJson([
+            'data' => [
+                [
+                    "id" => '3',
+                    "type" => "authors",
+                    "attributes" => [
+                        'name' => 'Anna',
+                        'created_at' => $authors[2]->created_at->toJSON(),
+                        'updated_at' => $authors[2]->updated_at->toJSON(),
+                    ]
+                ],
+                [
+                    "id" => '1',
+                    "type" => "authors",
+                    "attributes" => [
+                        'name' => 'Bertram',
+                        'created_at' => $authors[0]->created_at->toJSON(),
+                        'updated_at' => $authors[0]->updated_at->toJSON(),
+                    ]
+                ],
+                [
+                    "id" => '2',
+                    "type" => "authors",
+                    "attributes" => [
+                        'name' => 'Claus',
+                        'created_at' => $authors[1]->created_at->toJSON(),
+                        'updated_at' => $authors[1]->updated_at->toJSON(),
+                    ]
+
+                ]
+            ]
+        ]);
+});
+
+it('can sort authors by name in descending order through a sort query parameter', function () {
+    $authors = collect([
+        'Bertram',
+        'Claus',
+        'Anna',
+    ])->map(function ($name) {
+        return factory(Author::class)->create([
+            'name' => $name
+        ]);
+    });
+    $this->get('/api/v1/authors?sort=-name', [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
+    ])->assertStatus(200)->assertJson([
+        "data" => [
+            [
+                "id" => '2',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => 'Claus',
+                    'created_at' => $authors[1]->created_at->toJSON(),
+                    'updated_at' => $authors[1]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '1',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => 'Bertram',
+                    'created_at' => $authors[0]->created_at->toJSON(),
+                    'updated_at' => $authors[0]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '3',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => 'Anna',
+                    'created_at' => $authors[2]->created_at->toJSON(),
+                    'updated_at' => $authors[2]->updated_at->toJSON(),
+                ]
+            ],
+        ]
+    ]);
+});
+
+it('can paginate authors through a page query parameter', function () {
+    $authors = factory(Author::class, 10)->create();
+    $this->getJson('/api/v1/authors?page[size]=5&page[number]=1', [
+        'accept' => 'application/vnd.api+json',
+        'content-type' => 'application/vnd.api+json',
+    ])->assertStatus(200)->assertJson([
+        "data" => [
+            [
+                "id" => '1',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => $authors[0]->name,
+                    'created_at' => $authors[0]->created_at->toJSON(),
+                    'updated_at' => $authors[0]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '2',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => $authors[1]->name,
+                    'created_at' => $authors[1]->created_at->toJSON(),
+                    'updated_at' => $authors[1]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '3',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => $authors[2]->name,
+                    'created_at' => $authors[2]->created_at->toJSON(),
+                    'updated_at' => $authors[2]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '4',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => $authors[3]->name,
+                    'created_at' => $authors[3]->created_at->toJSON(),
+                    'updated_at' => $authors[3]->updated_at->toJSON(),
+                ]
+            ],
+            [
+                "id" => '5',
+                "type" => "authors",
+                "attributes" => [
+                    'name' => $authors[4]->name,
+                    'created_at' => $authors[4]->created_at->toJSON(),
+                    'updated_at' => $authors[4]->updated_at->toJSON(),
+                ]
+            ],
+        ],
+        'links' => [
+            'first' => route('authors.index', ['page[size]' => 5, 'page[number]' => 1]),
+            'last' => route('authors.index', ['page[size]' => 5, 'page[number]' => 2]),
+            'prev' => null,
+            'next' => route('authors.index', ['page[size]' => 5, 'page[number]' => 2]),
+        ]
+    ]);
+});

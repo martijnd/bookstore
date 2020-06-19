@@ -16,6 +16,8 @@
         "laravel/passport": "^9.2",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
+        "spatie/laravel-json-api-paginate": "^1.7",
+        "spatie/laravel-query-builder": "^2.8",
         "wackystudio/laravel-test-watcher": "^1.0"
     },
     "require-dev": {

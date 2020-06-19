@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -84,5 +85,21 @@ class Handler extends ExceptionHandler
         return response()->json([
             'errors' => $errors,
         ], $exception->status);
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'title' => 'Unauthenticated',
+                        'details' => 'You are not authenticated.'
+                    ]
+                ]
+            ], 403);
+        }
+
+        return redirect()->guest($exception->redirectTo() ?? route('login'));
     }
 }
